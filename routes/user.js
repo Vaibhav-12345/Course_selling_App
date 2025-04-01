@@ -1,6 +1,6 @@
 // const express=require('express');
 // const Router=express.Router;
-or 
+// or 
 const {Router} =require('express')
 
 const userRouter=Router()

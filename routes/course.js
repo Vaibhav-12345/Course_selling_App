@@ -2,16 +2,16 @@ const {Router} =require('express')
 
 const courseRouter=Router()
 
-courseRouter.post('/course/purchase',(req,res)=>{
+courseRouter.post('/purchase',(req,res)=>{
     //you would expect the user to pay 
     res.json({
         message:'signup endpoints'
     })
 })
 
-courseRouter.get('/courses',(req,res)=>{
+courseRouter.get('/preview',(req,res)=>{
     res.json({
-        message:'signup endpoints'
+        message:'all course preview endpoint we see here'
     })
 })
 
