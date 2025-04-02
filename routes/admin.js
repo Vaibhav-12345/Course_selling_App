@@ -2,10 +2,12 @@ const { Router } = require("express");
 
 const adminRouter = Router();
 const { adminModel } = require("../db");
+const {courseModel}= require('../db')
 const { z } = require("zod");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const JWT_ADMIN_SECRET = "random@1234";
+const{JWT_ADMIN_SECRET}=require('../config')
+const {adminMiddelware} =require('../middleware/admin')
 
 
 
@@ -108,20 +110,38 @@ adminRouter.post("/signin", async(req, res) => {
 });
 
 
-// course create by admin
-adminRouter.post("/", (req, res) => {
+// course create by admin(make sure user login )
+adminRouter.post("/course", adminMiddelware, async(req, res) => {
+  // we get admin id this user is loggin
+  const adminId=req.adminId;
+
+  const title=req.body.title;
+  const description=req.body.description;
+  const imageUrl=req.body.imageUrl;
+  const price=req.body.price;
+
+
+  const course=await courseModel.create({
+    title:title,
+    description:description,
+    price:price,
+    imageUrl:imageUrl,
+    creatorId:adminId
+  })
+
   res.json({
-    message: "signup endpoints",
+    message: "Course created",
+    courseId:course._id
   });
 });
  
-adminRouter.put("/", (req, res) => {
+adminRouter.put("/course", (req, res) => {
   res.json({
     message: "signup endpoints",
   });
 });
 
-adminRouter.get("/bulk", (req, res) => {
+adminRouter.get("/course/bulk", (req, res) => {
   res.json({
     message: "signup endpoints",
   });
