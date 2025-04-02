@@ -136,32 +136,52 @@ adminRouter.post("/course", adminMiddelware, async(req, res) => {
 });
  
 
-// how to do update the value of each course collecation of each value 
+// how to do update the value of each course collecation of each value  
+// course edit by admin
 adminRouter.put("/course",adminMiddelware,async (req, res) => {
 
-  const {title,description,price,imageUrl,creatorId}=req.body
+  const adminId=req.adminId;
+
+  const title=req.body.title;
+  const description=req.body.description;
+  const imageUrl=req.body.imageUrl;
+  const price=req.body.price;
+  const courseId=req.body.courseId;
 
 
-  const foundUser=await courseModel.findOne({
-    creatorId
+  const course=await courseModel.updateOne({
+    _id:courseId, //filter this id then update second object (ex : flying beast id)
+    creatorId:adminId // creatorId: flying beast id
+  },{
+    title:title,
+    description:description,
+    price:price,
+    imageUrl:imageUrl,
   })
 
-  
-
-
-
-
-
-
   res.json({
-    message: "signup endpoints",
+    message: "Course updated",
+    courseId:course._id
   });
+
+
+
 });
 
-adminRouter.get("/course/bulk", (req, res) => {
+adminRouter.get("/course/bulk", adminMiddelware,async(req, res) => {
+
+  const adminId=req.adminId;
+
+  const course=await courseModel.find({
+    creatorId:adminId // creatorId: flying beast id
+  })
+
   res.json({
-    message: "signup endpoints",
+    message: "Course updated",
+    courseId:course._id
   });
+
+
 });
 
 module.exports = {
