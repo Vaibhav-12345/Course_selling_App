@@ -135,7 +135,24 @@ adminRouter.post("/course", adminMiddelware, async(req, res) => {
   });
 });
  
-adminRouter.put("/course", (req, res) => {
+
+// how to do update the value of each course collecation of each value 
+adminRouter.put("/course",adminMiddelware,async (req, res) => {
+
+  const {title,description,price,imageUrl,creatorId}=req.body
+
+
+  const foundUser=await courseModel.findOne({
+    creatorId
+  })
+
+  
+
+
+
+
+
+
   res.json({
     message: "signup endpoints",
   });
