@@ -178,7 +178,7 @@ adminRouter.get("/course/bulk", adminMiddelware,async(req, res) => {
 
   res.json({
     message: "Course updated",
-    courseId:course._id
+    course
   });
 
 
