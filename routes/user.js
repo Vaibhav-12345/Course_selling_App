@@ -1,31 +1,119 @@
 // const express=require('express');
 // const Router=express.Router;
-// or 
-const {Router} =require('express')
+// or
+const { Router } = require("express");
+const userRouter = Router();
 
-const userRouter=Router()
+const { userModel } = require("../db");
+const { z } = require("zod");
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+const JWT_USER_SECRET = "random@123";
 
-const {userModel} =require('../db')
+userRouter.post("/signup", async (req, res) => {
+  // we use zod for input validation
+  const requestBody = z.object({
+    email: z.string().trim().min(3).max(100).email(),
+    password: z.string().trim().min(3).max(100),
+    firstName: z.string().trim().min(3).max(100),
+    lastName: z.string().trim().min(3).max(100),
+  });
 
-userRouter.post('/signup',(req,res)=>{
+  const email = req.body.email;
+  const password = req.body.password;
+  const firstName = req.body.firstName;
+  const lastName = req.body.lastName;
+
+  // ye mere ek try catch ke tarah kam karega (zod)
+  const parseDatawithSuccess = requestBody.safeParse(req.body);
+
+  if (!parseDatawithSuccess.success) {
     res.json({
-        message:'signup endpoints'
-    })
-})
+      message: "Invalid Credentaial",
+      error: parseDatawithSuccess.error.issues[0].message,
+    });
+    return;
+  }
 
-userRouter.post('/signin',(req,res)=>{
+  // Pehle check karo ki user exist karta hai ya nahi
+  const foundUser = await userModel.findOne({ email });
+
+  if (foundUser) {
     res.json({
-        message:'signin endpoints'
-    })
-})
+      message: "User already exists in the database",
+    });
+    return;
+  }
 
+  // bcrypt
+  const hashPassword = await bcrypt.hash(password, 5);
 
-userRouter.get('/purchases',(req,res)=>{
+  // Agar user nahi mila toh create karo
+  await userModel.create({
+    // we use shorthand property my variable name same with object key name so we use short hand property
+    email: email,
+    password: hashPassword,
+    firstName: firstName,
+    lastName: lastName,
+  });
+
+  res.json({
+    message: "signup successed",
+  });
+});
+
+userRouter.post("/signin", async (req, res) => {
+  // short hand
+  const { email, password } = req.body;
+  // or
+  // const email=req.body.email;
+  // const password=req.body.password;
+
+//   ideally password should be hashed, and hence you cant compare the user provided password and the database password 
+  const user = await userModel.findOne({
+    email,
+  });
+
+  if (!user) {
+    res.status(403).json({
+      message: "Invalid credential",
+    });
+    return;
+  }
+
+  const passwordVerify = await bcrypt.compare(
+    password,
+    user.password
+  );
+
+  if (passwordVerify) {
+    // jwt
+    const token = jwt.sign(
+      {
+        id: user._id.toString(),
+      },
+      JWT_USER_SECRET
+    );
+    res.header("token", token);
+
+    //DO cookie logic
+
     res.json({
-        message:'signup endpoints'
-    })
-})
+      token: token,
+    });
+  } else {
+    res.json({
+      message: "signin endpoints you are log  in",
+    });
+  }
+});
 
-module.exports={
-    userRouter:userRouter
-}
+userRouter.get("/purchases", (req, res) => {
+  res.json({
+    message: "signup endpoints",
+  });
+});
+
+module.exports = {
+  userRouter: userRouter,
+};
