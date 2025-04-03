@@ -4,7 +4,7 @@
 const { Router } = require("express");
 const userRouter = Router();
 
-const { userModel, purachaseModel } = require("../db");
+const { userModel, purachaseModel, courseModel } = require("../db");
 const { z } = require("zod");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
@@ -115,13 +115,18 @@ userRouter.get("/purchases",userMiddelware,async (req, res) => {
 
   // put condition like avoid to buy again this course check point condition add so user not buy this course again
 
-  const purchase=await purachaseModel.findOne({
+  const purchases=await purachaseModel.find({
     userId,
+  })
+  console.log(purchases)
+
+  const courseData=await courseModel.find({
+    _id:{$in: purchases.map(x=> x.courseId)}
   })
 
   res.json({
-    message: "users purchase only course",
-    purchase
+    purchases,
+    courseData
   });
 });
 
