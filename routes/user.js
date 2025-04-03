@@ -4,11 +4,12 @@
 const { Router } = require("express");
 const userRouter = Router();
 
-const { userModel } = require("../db");
+const { userModel, purachaseModel } = require("../db");
 const { z } = require("zod");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const  {JWT_USER_SECRET}=require('../config')
+const {userMiddelware}=require('../middleware/user')
 
 userRouter.post("/signup", async (req, res) => {
   // we use zod for input validation
@@ -108,9 +109,19 @@ userRouter.post("/signin", async (req, res) => {
   }
 });
 
-userRouter.get("/purchases", (req, res) => {
+userRouter.get("/purchases",userMiddelware,async (req, res) => {
+
+  const userId=req.userId;
+
+  // put condition like avoid to buy again this course check point condition add so user not buy this course again
+
+  const purchase=await purachaseModel.findOne({
+    userId,
+  })
+
   res.json({
-    message: "signup endpoints",
+    message: "users purchase only course",
+    purchase
   });
 });
 

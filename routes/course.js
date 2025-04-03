@@ -1,21 +1,39 @@
-const {Router} =require('express')
+const { Router } = require("express");
+const { userMiddelware } = require("../middleware/user");
 
-const courseRouter=Router()
+const courseRouter = Router();
 
-courseRouter.post('/purchase',(req,res)=>{
-    //you would expect the user to pay 
-    res.json({
-        message:'signup endpoints'
-    })
-})
+const { purachaseModel, courseModel } = require("../db");
+const { userMiddelware } = require("../middleware/user");
 
-courseRouter.get('/preview',(req,res)=>{
-    res.json({
-        message:'all course preview endpoint we see here'
-    })
-})
+courseRouter.post("/purchase", userMiddelware, async (req, res) => {
+  //you would expect the user to pay you money
 
+  const userId = req.body;
+  const courseId = req.body.courseId;
 
-module.exports={
-    courseRouter:courseRouter
-}
+  //1- put condition like avoid to buy again this course check point condition add so user not buy this course again
+
+  // 2- should check that the user has actually paid the price
+
+  await purachaseModel.create({
+    userId: userId,
+    courseId: courseId,
+  });
+
+  res.json({
+    message: "You have successfuly bought this content",
+  });
+});
+
+courseRouter.get("/preview", async (req, res) => {
+  const course = await courseModel.find({});
+
+  res.json({
+    course,
+  });
+});
+
+module.exports = {
+  courseRouter: courseRouter,
+};
